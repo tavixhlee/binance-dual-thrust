@@ -33,7 +33,10 @@ type BinanceKlineData = [
   string      // Ignore
 ];
 
+type TimeFrame = '1h' | '4h';
+
 export default function DualThrust({ symbol, k1 = 0.5, k2 = 0.5 }: DualThrustProps) {
+  const [timeFrame, setTimeFrame] = useState<TimeFrame>('1h');
   const [klines, setKlines] = useState<KlineData[]>([]);
   const [buySignal, setBuySignal] = useState<number | null>(null);
   const [sellSignal, setSellSignal] = useState<number | null>(null);
@@ -42,8 +45,9 @@ export default function DualThrust({ symbol, k1 = 0.5, k2 = 0.5 }: DualThrustPro
   useEffect(() => {
     const fetchKlines = async () => {
       try {
+        const limit = timeFrame === '1h' ? 24 : 96; // 4小时K线需要更多数据以保持相同的时间范围
         const response = await axios.get<BinanceKlineData[]>(
-          `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=24`
+          `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${timeFrame}&limit=${limit}`
         );
         
         const formattedKlines = response.data.map((kline) => ({
@@ -65,7 +69,8 @@ export default function DualThrust({ symbol, k1 = 0.5, k2 = 0.5 }: DualThrustPro
       if (klineData.length < 2) return;
 
       const lastKline = klineData[klineData.length - 1];
-      const prevKlines = klineData.slice(-24, -1); // 使用前23根K线
+      const lookback = timeFrame === '1h' ? 24 : 6; // 4小时K线使用前6根K线计算信号
+      const prevKlines = klineData.slice(-lookback - 1, -1);
 
       const hh = Math.max(...prevKlines.map(k => k.high));
       const ll = Math.min(...prevKlines.map(k => k.low));
@@ -86,7 +91,7 @@ export default function DualThrust({ symbol, k1 = 0.5, k2 = 0.5 }: DualThrustPro
     const interval = setInterval(fetchKlines, 60000); // 每分钟更新一次
 
     return () => clearInterval(interval);
-  }, [symbol, k1, k2]);
+  }, [symbol, k1, k2, timeFrame]);
 
   useEffect(() => {
     const chartElement = document.getElementById('chart');
@@ -167,7 +172,31 @@ export default function DualThrust({ symbol, k1 = 0.5, k2 = 0.5 }: DualThrustPro
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      <h3 className="text-lg font-medium mb-4">{symbol} Dual Thrust 信号</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium">{symbol} Dual Thrust 信号</h3>
+        <div className="flex space-x-2">
+          <button
+            className={`px-3 py-1 rounded ${
+              timeFrame === '1h'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            onClick={() => setTimeFrame('1h')}
+          >
+            1小时
+          </button>
+          <button
+            className={`px-3 py-1 rounded ${
+              timeFrame === '4h'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            onClick={() => setTimeFrame('4h')}
+          >
+            4小时
+          </button>
+        </div>
+      </div>
       <div id="chart" className="mb-4 w-full"></div>
       {currentPrice && buySignal && sellSignal && (
         <div className="grid grid-cols-3 gap-4 text-sm">
