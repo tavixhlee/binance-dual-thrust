@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Binance Dual Thrust 策略监控
 
-## Getting Started
+这是一个用于监控币安现货交易所中交易量大于1000万USDT的交易对的 Dual Thrust 策略信号的网页应用。
 
-First, run the development server:
+## 功能特点
 
+- 实时显示交易量大于1000万USDT的交易对列表
+- 使用 Dual Thrust 策略计算买卖信号
+- 可视化K线图表显示
+- 可调整策略参数（K1、K2）
+- 自动更新数据（每分钟）
+
+## 技术栈
+
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- Lightweight Charts
+- Binance API
+
+## 本地开发
+
+1. 克隆仓库：
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/tavixhlee/binance-dual-thrust.git
+cd binance-dual-thrust
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. 安装依赖：
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. 启动开发服务器：
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. 打开浏览器访问 http://localhost:3000
 
-## Learn More
+## 部署
 
-To learn more about Next.js, take a look at the following resources:
+项目已配置为可以直接部署到 Vercel 平台。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/tavixhlee/binance-dual-thrust)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 关于 Dual Thrust 策略
 
-## Deploy on Vercel
+Dual Thrust 是一个经典的趋势跟踪策略，其核心思想是通过计算上下轨来确定突破方向。策略的主要参数：
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- K1：上轨参数，用于计算做多信号
+- K2：下轨参数，用于计算做空信号
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+计算方法：
+1. Range = Max(HH-LC, HC-LL)
+   - HH = 前N根K线的最高价中的最高价
+   - LC = 前N根K线的收盘价中的最低价
+   - HC = 前N根K线的收盘价中的最高价
+   - LL = 前N根K线的最低价中的最低价
+
+2. 上轨 = 开盘价 + K1 × Range
+3. 下轨 = 开盘价 - K2 × Range
+
+## 许可证
+
+MIT
