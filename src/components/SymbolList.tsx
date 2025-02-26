@@ -14,6 +14,30 @@ interface SymbolListProps {
   selectedSymbol: string;
 }
 
+interface Binance24hrTicker {
+  symbol: string;
+  priceChange: string;
+  priceChangePercent: string;
+  weightedAvgPrice: string;
+  prevClosePrice: string;
+  lastPrice: string;
+  lastQty: string;
+  bidPrice: string;
+  bidQty: string;
+  askPrice: string;
+  askQty: string;
+  openPrice: string;
+  highPrice: string;
+  lowPrice: string;
+  volume: string;
+  quoteVolume: string;
+  openTime: number;
+  closeTime: number;
+  firstId: number;
+  lastId: number;
+  count: number;
+}
+
 export default function SymbolList({ onSelectSymbol, selectedSymbol }: SymbolListProps) {
   const [symbols, setSymbols] = useState<Symbol[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,19 +45,19 @@ export default function SymbolList({ onSelectSymbol, selectedSymbol }: SymbolLis
   useEffect(() => {
     const fetchSymbols = async () => {
       try {
-        const response = await axios.get('https://api.binance.com/api/v3/ticker/24hr');
+        const response = await axios.get<Binance24hrTicker[]>('https://api.binance.com/api/v3/ticker/24hr');
         const filteredSymbols = response.data
-          .filter((item: any) => {
+          .filter((item) => {
             const isUSDT = item.symbol.endsWith('USDT');
             const volume = parseFloat(item.quoteVolume);
             return isUSDT && volume > 10000000; // 1000万 USDT
           })
-          .map((item: any) => ({
+          .map((item) => ({
             symbol: item.symbol,
             volume: parseFloat(item.quoteVolume),
             price: parseFloat(item.lastPrice)
           }))
-          .sort((a: Symbol, b: Symbol) => b.volume - a.volume);
+          .sort((a, b) => b.volume - a.volume);
 
         setSymbols(filteredSymbols);
         setLoading(false);

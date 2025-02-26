@@ -18,6 +18,21 @@ interface DualThrustProps {
   k2: number;
 }
 
+type BinanceKlineData = [
+  number,     // Open time
+  string,     // Open
+  string,     // High
+  string,     // Low
+  string,     // Close
+  string,     // Volume
+  number,     // Close time
+  string,     // Quote asset volume
+  number,     // Number of trades
+  string,     // Taker buy base asset volume
+  string,     // Taker buy quote asset volume
+  string      // Ignore
+];
+
 export default function DualThrust({ symbol, k1 = 0.5, k2 = 0.5 }: DualThrustProps) {
   const [klines, setKlines] = useState<KlineData[]>([]);
   const [buySignal, setBuySignal] = useState<number | null>(null);
@@ -27,11 +42,11 @@ export default function DualThrust({ symbol, k1 = 0.5, k2 = 0.5 }: DualThrustPro
   useEffect(() => {
     const fetchKlines = async () => {
       try {
-        const response = await axios.get(
+        const response = await axios.get<BinanceKlineData[]>(
           `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=24`
         );
         
-        const formattedKlines = response.data.map((kline: any) => ({
+        const formattedKlines = response.data.map((kline) => ({
           time: new Date(kline[0]).toISOString(),
           open: parseFloat(kline[1]),
           high: parseFloat(kline[2]),
