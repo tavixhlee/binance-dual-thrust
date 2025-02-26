@@ -29,6 +29,21 @@ interface BacktestResult {
   sharpeRatio: number;
 }
 
+type BinanceKlineResponse = [
+  number,     // Open time
+  string,     // Open
+  string,     // High
+  string,     // Low
+  string,     // Close
+  string,     // Volume
+  number,     // Close time
+  string,     // Quote asset volume
+  number,     // Number of trades
+  string,     // Taker buy base asset volume
+  string,     // Taker buy quote asset volume
+  string      // Ignore
+];
+
 export default function Backtest({ symbol, k1, k2 }: BacktestProps) {
   const [startDate, setStartDate] = useState<string>(
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -46,11 +61,11 @@ export default function Backtest({ symbol, k1, k2 }: BacktestProps) {
       const startTime = new Date(startDate).getTime();
       const endTime = new Date(endDate).getTime() + 24 * 60 * 60 * 1000 - 1;
       
-      const response = await axios.get(
+      const response = await axios.get<BinanceKlineResponse[]>(
         `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${timeframe}&startTime=${startTime}&endTime=${endTime}&limit=1000`
       );
 
-      const klines = response.data.map((k: any) => ({
+      const klines = response.data.map((k: BinanceKlineResponse) => ({
         time: new Date(k[0]).toISOString(),
         open: parseFloat(k[1]),
         high: parseFloat(k[2]),
