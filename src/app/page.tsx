@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import SymbolList from '@/components/SymbolList';
 import DualThrust from '@/components/DualThrust';
+import Backtest from '@/components/Backtest';
 
 export default function Home() {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('BTCUSDT');
@@ -54,8 +55,9 @@ export default function Home() {
               />
             </div>
             
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-8">
               <DualThrust symbol={selectedSymbol} k1={k1} k2={k2} />
+              <Backtest symbol={selectedSymbol} k1={k1} k2={k2} />
             </div>
           </div>
         </div>
